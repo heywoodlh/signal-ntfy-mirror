@@ -39,7 +39,7 @@
           # If no configuration supplied, use $NTFY_HOST instead
           [[ ! -e "$NTFY_CLIENT_CONF" ]] && printf "default-host: $NTFY_HOST" > "$NTFY_CLIENT_CONF"
           # Subscribe to topic
-          ${pkgs.ntfy-sh}/bin/ntfy sub "$NTFY_TOPIC" 'echo "$m" | ${pkgs.signal-cli}/bin/signal-cli --config=$SIGNAL_CLI_DIR send $GROUP_ARG $SIGNAL_DEST --message-from-stdin'
+          ${pkgs.ntfy-sh}/bin/ntfy sub "$NTFY_TOPIC" 'echo "[$MESSAGE_PREFIX]: $m" | ${pkgs.signal-cli}/bin/signal-cli --config=$SIGNAL_CLI_DIR send $GROUP_ARG $SIGNAL_DEST --message-from-stdin'
         '';
         base-image = { name, entrypoint, env, }: (pkgs.dockerTools.buildImage {
           name = "${name}";
