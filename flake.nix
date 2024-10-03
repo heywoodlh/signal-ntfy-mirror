@@ -35,26 +35,25 @@
           [[ "$ERROR" == "true" ]] && printf "Error encountered. Exiting." && exit 1
           GROUP_ARG=""
           [[ -n $SIGNAL_GROUP ]] && export GROUP_ARG="-g"
+          SIGNAL_ACCOUNT_ARG=""
+          [[ -n $SIGNAL_ACCOUNT ]] && export SIGNAL_ACCOUNT_ARG="-a $SIGNAL_ACCOUNT"
 
           # If no configuration supplied, use $NTFY_HOST instead
           [[ ! -e "$NTFY_CLIENT_CONF" ]] && printf "default-host: $NTFY_HOST" > "$NTFY_CLIENT_CONF"
           # Subscribe to topic
-          ${pkgs.ntfy-sh}/bin/ntfy sub "$NTFY_TOPIC" '${pkgs.coreutils}/bin/printf "[$MESSAGE_PREFIX]: $m" | ${pkgs.signal-cli}/bin/signal-cli --config=$SIGNAL_CLI_DIR send $GROUP_ARG $SIGNAL_DEST --message-from-stdin --notify-self $SIGNAL_CLI_SEND_ARGS'
+          ${pkgs.ntfy-sh}/bin/ntfy sub "$NTFY_TOPIC" '${pkgs.coreutils}/bin/printf "[$MESSAGE_PREFIX]: $m" | ${pkgs.signal-cli}/bin/signal-cli $SIGNAL_ACCOUNT_ARG --config=$SIGNAL_CLI_DIR send $GROUP_ARG $SIGNAL_DEST --message-from-stdin --notify-self $SIGNAL_CLI_SEND_ARGS'
         '';
         base-image = { name, entrypoint, env, }: (pkgs.dockerTools.buildImage {
           name = "${name}";
           tag = "latest";
-        
           copyToRoot = pkgs.buildEnv {
             name = "image-root";
             paths = [ entrypoint pkgs.signaldctl ];
             pathsToLink = [ "/bin" ];
           };
-        
           runAsRoot = ''
             mkdir -p /data
           '';
-        
           config = {
             Env = [ env ];
             Cmd = [ "/bin/main" ];
